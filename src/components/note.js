@@ -14,26 +14,44 @@ class Note extends Component {
     this.state = {
       isEditing: false,
       editText: '',
+      editTitle: '',
     };
   }
 
-  edit = (event) => {
+  editTitle = (event) => {
+    this.setState({ editTitle: event.target.value });
+  }
+
+  editText = (event) => {
     this.setState({ editText: event.target.value });
   }
 
   save = () => {
     const originalState = this.state.isEditing;
     if (originalState) {
-      this.props.onNoteChange(this.state.editText);
+      this.props.onNoteChange(this.state.editTitle, this.state.editText);
     } else {
-      this.setState({ editText: this.props.note.text });
+      this.setState({
+        editTitle: this.props.note.title,
+        editText: this.props.note.text,
+      });
     }
     this.setState({ isEditing: !originalState });
   }
 
+  renderNoteTitle() {
+    if (this.state.isEditing) {
+      return (<TextareaAutosize className="text-edit" id="title-edit" value={this.state.editTitle} onChange={this.editTitle} />);
+    } else {
+      return (
+        <div className="title">{this.props.note.title}</div>
+      );
+    }
+  }
+
   renderNoteBody() {
     if (this.state.isEditing) {
-      return (<TextareaAutosize className="text-edit" value={this.state.editText} onChange={this.edit} />);
+      return (<TextareaAutosize className="text-edit" value={this.state.editText} onChange={this.editText} />);
     } else {
       return (
         // eslint-disable-next-line react/no-danger
@@ -42,7 +60,7 @@ class Note extends Component {
     }
   }
 
-  renderSaveIcon() {
+  renderSaveButton() {
     if (this.state.isEditing) {
       return (
         <FontAwesomeIcon icon={faCheck} size="lg" className="title-icon" />
@@ -60,24 +78,26 @@ class Note extends Component {
         defaultPosition={{ x: this.props.note.x, y: this.props.note.y }}
         onDrag={this.props.onDrag}
         handle=".drag-icon"
+        position={{ x: this.props.note.x, y: this.props.note.y }}
       >
 
         <div className="note" style={{ zIndex: this.props.note.zIndex }}>
           <div className="title-header">
-            <div className="title">{this.props.note.title}</div>
-            <button type="button" onClick={this.props.onDelete}>
-              <FontAwesomeIcon icon={faTrashAlt} size="lg" className="title-icon" />
-            </button>
-            <button type="button" onClick={this.save}>
-              { this.renderSaveIcon() }
-            </button>
+            { this.renderNoteTitle() }
+            <div className="edit-icons">
+              <button type="button" onClick={this.props.onDelete}>
+                <FontAwesomeIcon icon={faTrashAlt} size="lg" className="title-icon" />
+              </button>
+              <button type="button" onClick={this.save}>
+                { this.renderSaveButton() }
+              </button>
+            </div>
             <div id="note-divider" />
           </div>
           <FontAwesomeIcon icon={faArrowsAlt} className="drag-icon" size="lg" />
-
           { this.renderNoteBody() }
-
         </div>
+
       </Draggable>
     );
   }

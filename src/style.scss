@@ -22,6 +22,12 @@ body {
     width: 100%;
 }
 
+#title-edit {
+    font-weight: 700;
+    font-size: 24px;
+    border: 0px;
+}
+
 .note {
     position: absolute;
     background: white;
@@ -76,4 +82,10 @@ button {
      min-width: 20px;
      flex-grow: 1;
      flex-shrink: 0;
+ }
+
+ .edit-icons {
+     display: flex;
+     align-self: flex-start;
+     margin-top: 4px;
  }

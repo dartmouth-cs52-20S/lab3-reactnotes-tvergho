@@ -4,64 +4,61 @@ import './style.scss';
 import { Map } from 'immutable';
 import Note from './components/note';
 import AddNoteBar from './components/add_note_bar';
+import * as db from './services/datastore';
 
 class App extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      nextId: 2,
+      nextZ: 0,
       // eslint-disable-next-line new-cap
-      notes: Map({
-        0: {
-          title: 'first note',
-          text: 'Hello world',
-          x: 20,
-          y: 80,
-          zIndex: 0,
-        },
-        1: {
-          title: 'second note',
-          text: 'Hello world',
-          x: 120,
-          y: 160,
-          zIndex: 1,
-        },
-      }),
+      notes: Map(),
     };
   }
 
-  handleDrag = (e, ui, id) => {
-    this.setState((prevState) => ({
-      notes: prevState.notes.update(id, (n) => { return { ...n, x: ui.x, y: ui.y }; }),
-    }));
-  };
+  componentDidMount() {
+    db.fetchNotes((notes) => {
+      // eslint-disable-next-line new-cap
+      this.setState({ notes: Map(notes) });
+    });
+  }
 
   delete = (id) => {
-    this.setState((prevState) => ({
-      notes: prevState.notes.delete(id),
-    }));
+    db.deleteNote(id);
   }
 
-  noteChange = (id, newText) => {
-    this.setState((prevState) => ({
-      notes: prevState.notes.update(id, (n) => { return { ...n, text: newText }; }),
-    }));
+  noteChange = (id, newTitle, newText) => {
+    const newNote = this.state.notes.get(id);
+    newNote.title = newTitle;
+    newNote.text = newText;
+    db.updateNote(id, newNote);
   }
+
+  handleDrag = (e, ui, id) => {
+    const newNote = this.state.notes.get(id);
+    newNote.x = ui.x;
+    newNote.y = ui.y;
+    db.updateNote(id, newNote);
+  };
 
   onAddNote = (e, title) => {
     e.preventDefault();
-    const i = this.state.nextId;
-    this.setState((prevState) => ({
-      nextId: i + 1,
-      notes: prevState.notes.set(`${i}`, {
-        title,
-        text: '',
-        x: 200,
-        y: 200,
-        zIndex: i,
-      }),
-    }));
+    const z = this.state.nextZ;
+    const note = {
+      title,
+      text: '',
+      x: 200,
+      y: 200,
+      zIndex: z,
+    };
+    const update = (key) => {
+      this.setState((prevState) => ({
+        nextZ: z + 1,
+        notes: prevState.notes.set(key, note),
+      }));
+    };
+    db.addNote(note, (key) => update(key));
   }
 
   render() {
@@ -73,7 +70,7 @@ class App extends Component {
             note={note}
             onDrag={(e, ui) => this.handleDrag(e, ui, id)}
             onDelete={() => this.delete(id)}
-            onNoteChange={(text) => this.noteChange(id, text)}
+            onNoteChange={(title, text) => this.noteChange(id, title, text)}
           />
         )) }
       </div>
