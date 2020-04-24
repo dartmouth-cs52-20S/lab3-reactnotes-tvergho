@@ -82,7 +82,8 @@ class Note extends Component {
         position={{ x: this.props.note.x, y: this.props.note.y }}
       >
 
-        <div className="note" style={{ zIndex: this.props.note.zIndex }}>
+        { /* eslint-disable-next-line jsx-a11y/no-static-element-interactions */ }
+        <div className="note" style={{ zIndex: this.props.note.zIndex }} onClick={this.props.onClick}>
           <div className="title-header">
             { this.renderNoteTitle() }
             <div className="edit-icons">
