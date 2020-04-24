@@ -1,12 +1,79 @@
-body, html {
-    font-family: "Roboto", sans-serif;
-    background: linear-gradient(to bottom, #87e0fd 0%,#53cbf1 40%,#05abe0 100%);
-    height: 100%;
+* {
+    box-sizing: border-box; 
 }
-.logo {
-    background-image: url('img/ball.png');
-    width: 100px;
-    height: 100px;
-    background-repeat: no-repeat;
-    background-size: contain;
+
+body {
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+    background: rgba(0,0,0,0.1);
 }
+
+.add-note-bar {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    max-width: 80%;
+}
+
+#input-text {
+    border-radius: 4px;
+}
+
+.text-edit {
+    width: 100%;
+}
+
+.note {
+    position: absolute;
+    background: white;
+    box-shadow: 4px 4px 10px 1px rgba(0, 0, 0, 0.5);
+    padding: 5px 10px 10px 10px;
+    height: auto;
+    border-radius: 5px;
+    border: 1px solid rgba(0, 0, 0, 0.5);
+}
+
+.title {
+    font-weight: 700;
+    font-size: 24px;
+}
+
+.title-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    padding-bottom: 10px;
+    align-items: center;
+    min-width: 250px;
+}
+
+.title-icon {
+    margin-left: 8px;
+}
+
+.note-text {
+    padding-bottom: 5px;
+}
+
+.drag-icon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+button:focus, .text-edit:focus {
+    outline: 0; 
+}
+
+button {
+    border: none;
+    background-color: transperant;
+    outline: none;
+    padding: 0px;
+ }
+
+ #note-divider {
+     margin-right: 10px;
+     min-width: 20px;
+     flex-grow: 1;
+     flex-shrink: 0;
+ }
