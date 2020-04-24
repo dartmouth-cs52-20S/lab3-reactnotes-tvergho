@@ -76,6 +76,7 @@ class Note extends Component {
     return (
       <Draggable
         defaultPosition={{ x: this.props.note.x, y: this.props.note.y }}
+        onStart={this.props.onStartDrag}
         onDrag={this.props.onDrag}
         handle=".drag-icon"
         position={{ x: this.props.note.x, y: this.props.note.y }}

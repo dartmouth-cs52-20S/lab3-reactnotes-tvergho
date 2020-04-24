@@ -20,10 +20,8 @@ export function fetchNotes(callback) {
   });
 }
 
-export function addNote(note, callback) {
-  firebase.database().ref('notes').push(note, (snapshot) => {
-    callback(snapshot.key);
-  });
+export function addNote(note) {
+  firebase.database().ref('notes').push(note);
 }
 
 export function deleteNote(id) {

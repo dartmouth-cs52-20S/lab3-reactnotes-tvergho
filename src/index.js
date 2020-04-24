@@ -19,9 +19,24 @@ class App extends Component {
 
   componentDidMount() {
     db.fetchNotes((notes) => {
-      // eslint-disable-next-line new-cap
-      this.setState({ notes: Map(notes) });
+      this.setState((prevState) => ({
+        // eslint-disable-next-line new-cap
+        notes: Map(notes),
+      }));
     });
+  }
+
+  updateZ = () => {
+    let z = this.state.nextZ;
+    this.state.notes.valueSeq().toArray().forEach((note) => {
+      if (note.zIndex >= z) {
+        z = note.zIndex + 1;
+      }
+    });
+
+    this.setState(() => ({
+      nextZ: z,
+    }));
   }
 
   delete = (id) => {
@@ -39,11 +54,13 @@ class App extends Component {
     const newNote = this.state.notes.get(id);
     newNote.x = ui.x;
     newNote.y = ui.y;
+    newNote.zIndex = this.state.nextZ;
     db.updateNote(id, newNote);
   };
 
   onAddNote = (e, title) => {
     e.preventDefault();
+    this.updateZ();
     const z = this.state.nextZ;
     const note = {
       title,
@@ -52,13 +69,7 @@ class App extends Component {
       y: 200,
       zIndex: z,
     };
-    const update = (key) => {
-      this.setState((prevState) => ({
-        nextZ: z + 1,
-        notes: prevState.notes.set(key, note),
-      }));
-    };
-    db.addNote(note, (key) => update(key));
+    db.addNote(note);
   }
 
   render() {
@@ -69,6 +80,7 @@ class App extends Component {
           <Note key={id}
             note={note}
             onDrag={(e, ui) => this.handleDrag(e, ui, id)}
+            onStartDrag={() => this.updateZ()}
             onDelete={() => this.delete(id)}
             onNoteChange={(title, text) => this.noteChange(id, title, text)}
           />
