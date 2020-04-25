@@ -26,6 +26,7 @@ export function addNote(note) {
 
 export function deleteNote(id) {
   firebase.database().ref('notes').child(id).remove();
+  console.log(id);
 }
 
 export function updateNote(id, note) {

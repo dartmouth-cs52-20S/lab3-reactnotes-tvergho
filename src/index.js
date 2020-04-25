@@ -39,14 +39,16 @@ class App extends Component {
     }));
   }
 
-  bringToFront = (id) => {
+  bringToFront = (e, id) => {
+    e.stopPropagation();
     this.updateZ();
     const newNote = this.state.notes.get(id);
     newNote.zIndex = this.state.nextZ;
     db.updateNote(id, newNote);
   }
 
-  delete = (id) => {
+  delete = (e, id) => {
+    e.stopPropagation();
     db.deleteNote(id);
   }
 
@@ -88,9 +90,9 @@ class App extends Component {
             note={note}
             onDrag={(e, ui) => this.handleDrag(e, ui, id)}
             onStartDrag={() => this.updateZ()}
-            onDelete={() => this.delete(id)}
+            onDelete={(e) => this.delete(e, id)}
             onNoteChange={(title, text) => this.noteChange(id, title, text)}
-            onClick={() => this.bringToFront(id)}
+            onClick={(e) => this.bringToFront(e, id)}
           />
         )) }
       </div>

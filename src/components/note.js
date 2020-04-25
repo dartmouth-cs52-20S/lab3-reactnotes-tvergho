@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowsAlt, faTrashAlt, faEdit, faCheck,
 } from '@fortawesome/free-solid-svg-icons';
+// import { ResizableBox } from 'react-resizable';
 
 class Note extends Component {
   constructor(props) {
@@ -83,11 +84,11 @@ class Note extends Component {
       >
 
         { /* eslint-disable-next-line jsx-a11y/no-static-element-interactions */ }
-        <div className="note" style={{ zIndex: this.props.note.zIndex }} onClick={this.props.onClick}>
+        <div className="note" style={{ zIndex: this.props.note.zIndex }} onClick={(e) => this.props.onClick(e)}>
           <div className="title-header">
             { this.renderNoteTitle() }
             <div className="edit-icons">
-              <button type="button" onClick={this.props.onDelete}>
+              <button type="button" onClick={(e) => this.props.onDelete(e)}>
                 <FontAwesomeIcon icon={faTrashAlt} size="lg" className="title-icon" />
               </button>
               <button type="button" onClick={this.save}>
