@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUndo } from '@fortawesome/free-solid-svg-icons';
 
 class AddNoteBar extends Component {
   constructor(props) {
@@ -18,6 +20,7 @@ class AddNoteBar extends Component {
         <div className="input-group">
           <input className="form-control mr-2" id="input-text" type="text" placeholder="new note title" aria-label="new note title" value={this.state.title} onChange={this.onInputChange} />
           <button className="btn btn-success my-xs-2" type="button" onClick={(e) => this.props.onClick(e, this.state.title)}>Add Note</button>
+          <button type="button" onClick={this.props.undo} aria-label="Undo" style={{ marginLeft: 5 }} id="undo-button"><FontAwesomeIcon icon={faUndo} size="2x" className="title-icon" /></button>
         </div>
       </form>
     );

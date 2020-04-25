@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import './style.scss';
-import { Map } from 'immutable';
+import { Map, List } from 'immutable';
 import Note from './components/note';
 import AddNoteBar from './components/add_note_bar';
 import * as db from './services/datastore';
@@ -12,18 +12,48 @@ class App extends Component {
 
     this.state = {
       nextZ: 0,
+      hasBeenInitialized: false,
       // eslint-disable-next-line new-cap
       notes: Map(),
+      // eslint-disable-next-line new-cap
+      undoHistory: List(),
     };
   }
 
   componentDidMount() {
     db.fetchNotes((notes) => {
+      // console.log(notes);
       this.setState((prevState) => ({
         // eslint-disable-next-line new-cap
         notes: Map(notes),
       }));
+
+      if (!this.state.hasBeenInitialized) {
+        this.setState((prevState) => ({
+          // eslint-disable-next-line new-cap
+          undoHistory: prevState.undoHistory.push(Map(notes)),
+          hasBeenInitialized: true,
+        }), () => {
+          this.updateZ();
+        });
+      }
     });
+  }
+
+  addToUndo = () => {
+    this.setState((prevState) => ({
+      undoHistory: prevState.undoHistory.push(prevState.notes),
+    }));
+  }
+
+  undo = () => {
+    if (this.state.undoHistory.size >= 2) {
+      db.updateAllNotes(this.state.undoHistory.get(this.state.undoHistory.size - 2));
+
+      this.setState((prevState) => ({
+        undoHistory: prevState.undoHistory.pop(),
+      }));
+    }
   }
 
   updateZ = () => {
@@ -39,24 +69,24 @@ class App extends Component {
     }));
   }
 
-  bringToFront = (e, id) => {
-    e.stopPropagation();
+  bringToFront = (id) => {
     this.updateZ();
-    const newNote = this.state.notes.get(id);
-    newNote.zIndex = this.state.nextZ;
-    db.updateNote(id, newNote);
+    db.updateZ(id, this.state.nextZ);
   }
 
   delete = (e, id) => {
     e.stopPropagation();
     db.deleteNote(id);
+    this.addToUndo();
   }
 
   noteChange = (id, newTitle, newText) => {
+    console.log(this.state.notes.get(id));
     const newNote = this.state.notes.get(id);
     newNote.title = newTitle;
     newNote.text = newText;
     db.updateNote(id, newNote);
+    this.addToUndo();
   }
 
   handleDrag = (e, ui, id) => {
@@ -65,7 +95,8 @@ class App extends Component {
     newNote.y = ui.y;
     newNote.zIndex = this.state.nextZ;
     db.updateNote(id, newNote);
-  };
+    this.addToUndo();
+  }
 
   onAddNote = (e, title) => {
     e.preventDefault();
@@ -81,6 +112,7 @@ class App extends Component {
       height: 100,
     };
     db.addNote(note);
+    this.addToUndo();
   }
 
   resize = (e, direction, ref, delta, pos, id) => {
@@ -88,30 +120,29 @@ class App extends Component {
     newNote.width += delta.width;
     newNote.height += delta.height;
     db.updateNote(id, newNote);
+    this.addToUndo();
   }
 
-  heightChange = (size, id) => {
-    console.log('height change');
-    const newNote = this.state.notes.get(id);
-    newNote.height = size.height + 70;
-    console.log(size.height);
-    db.updateNote(id, newNote);
+  startUndo = (id) => {
+    this.addToUndo(() => {
+      this.bringToFront(id);
+    });
   }
 
   render() {
     return (
       <div>
-        <AddNoteBar onClick={(e, title) => this.onAddNote(e, title)} />
+        <AddNoteBar onClick={(e, title) => this.onAddNote(e, title)} undo={() => this.undo()} />
         { this.state.notes.entrySeq().map(([id, note]) => (
           <Note key={id}
             note={note}
             onDrag={(e, ui) => this.handleDrag(e, ui, id)}
-            onStartDrag={() => this.updateZ()}
+            onStartDrag={() => this.bringToFront(id)}
             onDelete={(e) => this.delete(e, id)}
             onNoteChange={(title, text) => this.noteChange(id, title, text)}
-            onClick={(e) => this.bringToFront(e, id)}
+            onClick={() => this.bringToFront(id)}
+            onResizeStart={() => this.bringToFront(id)}
             onResize={(e, direction, ref, delta, pos) => this.resize(e, direction, ref, delta, pos, id)}
-            onHeightChange={(size) => this.heightChange(size, id)}
           />
         )) }
       </div>

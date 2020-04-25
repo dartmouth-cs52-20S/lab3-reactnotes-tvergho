@@ -26,9 +26,25 @@ export function addNote(note) {
 
 export function deleteNote(id) {
   firebase.database().ref('notes').child(id).remove();
-  console.log(id);
 }
 
 export function updateNote(id, note) {
   firebase.database().ref('notes').child(id).update(note);
+}
+
+export function updateZ(id, z) {
+  firebase.database().ref('notes').child(id).update({ zIndex: z });
+}
+
+export function updateAllNotes(notes) {
+  notes.entrySeq().forEach(([id, note]) => {
+    firebase.database().ref('notes').child(id).update(note);
+  });
+  firebase.database().ref('notes').once('value', (snapshot) => {
+    snapshot.forEach((child) => {
+      if (!notes.has(child.key)) {
+        firebase.database().ref('notes').child(child.key).remove();
+      }
+    });
+  });
 }

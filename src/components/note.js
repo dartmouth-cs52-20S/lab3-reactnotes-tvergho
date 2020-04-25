@@ -94,6 +94,7 @@ class Note extends Component {
         size={{ width: this.props.note.width, height: this.props.note.height }}
         position={{ x: this.props.note.x, y: this.props.note.y }}
         onClick={(e) => this.props.onClick(e)}
+        onResizeStart={this.props.onResizeStart}
         onResizeStop={this.props.onResize}
         className="note"
         minWidth="300"

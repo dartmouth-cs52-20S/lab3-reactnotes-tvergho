@@ -87,20 +87,23 @@ button:focus, .text-edit:focus {
 
 button {
     border: none;
-    background-color: transperant;
     outline: none;
     padding: 0px;
- }
+}
 
- #note-divider {
-     margin-right: 10px;
-     min-width: 20px;
-     flex-grow: 1;
-     flex-shrink: 0;
- }
+#undo-button {
+    background-color: rgba(0,0,0,0);
+}
 
- .edit-icons {
-     display: flex;
-     align-self: flex-start;
-     margin-top: 4px;
- }
+#note-divider {
+    margin-right: 10px;
+    min-width: 20px;
+    flex-grow: 1;
+    flex-shrink: 0;
+}
+
+.edit-icons {
+    display: flex;
+    align-self: flex-start;
+    margin-top: 4px;
+}
