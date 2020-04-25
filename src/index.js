@@ -123,12 +123,6 @@ class App extends Component {
     this.addToUndo();
   }
 
-  startUndo = (id) => {
-    this.addToUndo(() => {
-      this.bringToFront(id);
-    });
-  }
-
   render() {
     return (
       <div>
