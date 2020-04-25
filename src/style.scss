@@ -36,6 +36,12 @@ body {
     height: auto;
     border-radius: 5px;
     border: 1px solid rgba(0, 0, 0, 0.5);
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+.tether {
+    position: absolute;
 }
 
 .title {

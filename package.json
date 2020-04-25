@@ -50,10 +50,13 @@
     "jquery": "^3.5.0",
     "lodash.debounce": "^4.0.8",
     "marked": "^1.0.0",
+    "re-resizable": "^6.3.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-draggable": "^4.3.1",
     "react-resizable": "^1.10.1",
+    "react-resize-aware": "^3.0.0",
+    "react-rnd": "^10.1.9",
     "react-router": "^5.1.2",
     "react-textarea-autosize": "^7.1.2"
   }

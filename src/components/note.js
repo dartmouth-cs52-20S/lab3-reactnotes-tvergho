@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
-import Draggable from 'react-draggable';
 import marked from 'marked';
 import TextareaAutosize from 'react-textarea-autosize';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowsAlt, faTrashAlt, faEdit, faCheck,
 } from '@fortawesome/free-solid-svg-icons';
-// import { ResizableBox } from 'react-resizable';
+import { Rnd } from 'react-rnd';
 
 class Note extends Component {
   constructor(props) {
@@ -42,7 +41,14 @@ class Note extends Component {
 
   renderNoteTitle() {
     if (this.state.isEditing) {
-      return (<TextareaAutosize className="text-edit" id="title-edit" value={this.state.editTitle} onChange={this.editTitle} />);
+      return (
+        <TextareaAutosize
+          className="text-edit"
+          id="title-edit"
+          value={this.state.editTitle}
+          onChange={this.editTitle}
+        />
+      );
     } else {
       return (
         <div className="title">{this.props.note.title}</div>
@@ -75,33 +81,40 @@ class Note extends Component {
 
   render() {
     return (
-      <Draggable
-        defaultPosition={{ x: this.props.note.x, y: this.props.note.y }}
-        onStart={this.props.onStartDrag}
+      <Rnd
+        default={{
+          x: this.props.note.x,
+          y: this.props.note.y,
+          width: this.props.note.width,
+          height: this.props.note.height,
+        }}
+        onDragStart={this.props.onStartDrag}
         onDrag={this.props.onDrag}
-        handle=".drag-icon"
+        dragHandleClassName="drag-icon"
+        size={{ width: this.props.note.width, height: this.props.note.height }}
         position={{ x: this.props.note.x, y: this.props.note.y }}
+        onClick={(e) => this.props.onClick(e)}
+        onResizeStop={this.props.onResize}
+        className="note"
+        minWidth="300"
+        minHeight="100"
+        style={{ zIndex: this.props.note.zIndex }}
       >
-
-        { /* eslint-disable-next-line jsx-a11y/no-static-element-interactions */ }
-        <div className="note" style={{ zIndex: this.props.note.zIndex }} onClick={(e) => this.props.onClick(e)}>
-          <div className="title-header">
-            { this.renderNoteTitle() }
-            <div className="edit-icons">
-              <button type="button" onClick={(e) => this.props.onDelete(e)}>
-                <FontAwesomeIcon icon={faTrashAlt} size="lg" className="title-icon" />
-              </button>
-              <button type="button" onClick={this.save}>
-                { this.renderSaveButton() }
-              </button>
-            </div>
-            <div id="note-divider" />
+        <div className="title-header">
+          { this.renderNoteTitle() }
+          <div className="edit-icons">
+            <button type="button" onClick={(e) => this.props.onDelete(e)}>
+              <FontAwesomeIcon icon={faTrashAlt} size="lg" className="title-icon" />
+            </button>
+            <button type="button" onClick={this.save}>
+              { this.renderSaveButton() }
+            </button>
           </div>
-          <FontAwesomeIcon icon={faArrowsAlt} className="drag-icon" size="lg" />
-          { this.renderNoteBody() }
+          <div id="note-divider" />
         </div>
-
-      </Draggable>
+        <FontAwesomeIcon icon={faArrowsAlt} className="drag-icon" size="lg" />
+        { this.renderNoteBody() }
+      </Rnd>
     );
   }
 }

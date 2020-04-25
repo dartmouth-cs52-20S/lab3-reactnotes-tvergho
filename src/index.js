@@ -77,8 +77,25 @@ class App extends Component {
       x: 200,
       y: 200,
       zIndex: z,
+      width: 300,
+      height: 100,
     };
     db.addNote(note);
+  }
+
+  resize = (e, direction, ref, delta, pos, id) => {
+    const newNote = this.state.notes.get(id);
+    newNote.width += delta.width;
+    newNote.height += delta.height;
+    db.updateNote(id, newNote);
+  }
+
+  heightChange = (size, id) => {
+    console.log('height change');
+    const newNote = this.state.notes.get(id);
+    newNote.height = size.height + 70;
+    console.log(size.height);
+    db.updateNote(id, newNote);
   }
 
   render() {
@@ -93,6 +110,8 @@ class App extends Component {
             onDelete={(e) => this.delete(e, id)}
             onNoteChange={(title, text) => this.noteChange(id, title, text)}
             onClick={(e) => this.bringToFront(e, id)}
+            onResize={(e, direction, ref, delta, pos) => this.resize(e, direction, ref, delta, pos, id)}
+            onHeightChange={(size) => this.heightChange(size, id)}
           />
         )) }
       </div>
