@@ -89,7 +89,7 @@ class Note extends Component {
           height: this.props.note.height,
         }}
         onDragStart={this.props.onStartDrag}
-        onDrag={this.props.onDrag}
+        onDragStop={this.props.onDrag}
         dragHandleClassName="drag-icon"
         size={{ width: this.props.note.width, height: this.props.note.height }}
         position={{ x: this.props.note.x, y: this.props.note.y }}
