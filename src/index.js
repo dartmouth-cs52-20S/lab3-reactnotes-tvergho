@@ -8,6 +8,7 @@ import {
 } from 'react-router-dom';
 import NoteGenerator from './components/note_generator';
 import AddNoteBar from './components/add_note_bar';
+import NewBoardBar from './components/new_board_bar';
 import * as db from './services/datastore';
 
 class App extends Component {
@@ -24,28 +25,38 @@ class App extends Component {
     };
   }
 
+  refresh = () => {
+    this.setState(() => ({
+      nextZ: 0,
+      hasBeenInitialized: false,
+      // eslint-disable-next-line new-cap
+      notes: Map(),
+      // eslint-disable-next-line new-cap
+      undoHistory: List(),
+    }));
+  }
+
   updateNotes = (notes) => {
     this.setState((prevState) => ({
       // eslint-disable-next-line new-cap
       notes: Map(notes),
-    }));
-
-    if (!this.state.hasBeenInitialized) {
-      this.setState((prevState) => ({
+    }), () => {
+      if (!this.state.hasBeenInitialized) {
+        this.setState((prevState) => ({
         // eslint-disable-next-line new-cap
-        undoHistory: prevState.undoHistory.push(Map(notes)),
-        hasBeenInitialized: true,
-      }), () => {
-        this.updateZ();
-      });
-    }
+          undoHistory: prevState.undoHistory.push(Map(notes)),
+          hasBeenInitialized: true,
+        }), () => {
+          this.updateZ();
+        });
+      }
+    });
   }
 
   addToUndo = () => {
     this.setState((prevState) => ({
       undoHistory: prevState.undoHistory.push(prevState.notes),
     }));
-    console.log(this.state.undoHistory);
   }
 
   undo = (boardId) => {
@@ -126,6 +137,8 @@ class App extends Component {
   render() {
     return (
       <Router>
+        <NewBoardBar onBoardRefresh={() => this.refresh()} />
+
         {/* eslint-disable-next-line react/jsx-props-no-spreading */ }
         <Route exact path="/" render={(props) => (<AddNoteBar onClick={(e, title, boardId) => this.onAddNote(e, title, boardId)} undo={(boardId) => this.undo(boardId)} {...props} />)} />
         <Route exact
@@ -139,6 +152,7 @@ class App extends Component {
               noteChange={(id, title, text, boardId) => this.noteChange(id, title, text, boardId)}
               resize={(e, direction, ref, delta, pos, id, boardId) => this.resize(e, direction, ref, delta, pos, id, boardId)}
               onDataChange={(notes) => this.updateNotes(notes)}
+              onBoardRefresh={() => this.refresh()}
               /* eslint-disable-next-line react/jsx-props-no-spreading */
               {...props}
             />
@@ -157,6 +171,7 @@ class App extends Component {
               noteChange={(id, title, text, boardId) => this.noteChange(id, title, text, boardId)}
               resize={(e, direction, ref, delta, pos, id, boardId) => this.resize(e, direction, ref, delta, pos, id, boardId)}
               onDataChange={(notes) => this.updateNotes(notes)}
+              onBoardRefresh={() => this.refresh()}
               /* eslint-disable-next-line react/jsx-props-no-spreading */
               {...props}
             />

@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 // import { useParams } from 'react-router';
+import { withRouter } from 'react-router-dom';
 import Note from './note';
 import * as db from '../services/datastore';
 
@@ -7,10 +8,11 @@ const NoteGenerator = (props) => {
   const boardId = props.match.params.id;
 
   useEffect(() => {
+    props.onBoardRefresh();
     if (props.match.params !== undefined) {
       db.fetchNotes(props.match.params.id, (notes) => props.onDataChange(notes));
     }
-  }, []);
+  }, [boardId]);
 
   return (
     props.notes.entrySeq().map(([id, note]) => {
@@ -30,4 +32,4 @@ const NoteGenerator = (props) => {
   );
 };
 
-export default NoteGenerator;
+export default withRouter(NoteGenerator);
