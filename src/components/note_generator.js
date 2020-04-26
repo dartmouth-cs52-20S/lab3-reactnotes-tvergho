@@ -20,7 +20,7 @@ const NoteGenerator = (props) => {
         <Note key={id}
           note={note}
           onDrag={(e, ui) => props.handleDrag(e, ui, id, boardId)}
-          onStartDrag={() => props.bringToFront(id, boardId)}
+          onStartDrag={() => props.startDrag(id, boardId)}
           onDelete={(e) => props.delete(e, id, boardId)}
           onNoteChange={(title, text) => props.noteChange(id, title, text, boardId)}
           onClick={() => props.bringToFront(id, boardId)}

@@ -82,6 +82,11 @@ class App extends Component {
     }));
   }
 
+  startDrag = (id, boardId) => {
+    this.bringToFront(id, boardId);
+    this.addToUndo();
+  }
+
   bringToFront = (id, boardId) => {
     this.updateZ();
     db.updateZ(id, this.state.nextZ, boardId);
@@ -105,7 +110,7 @@ class App extends Component {
     newNote.x = ui.x;
     newNote.y = ui.y;
     newNote.zIndex = this.state.nextZ;
-    db.updateNote(id, newNote, boardId, () => this.addToUndo());
+    db.updateNote(id, newNote, boardId, () => {});
   }
 
   onAddNote = (e, title, boardId) => {
@@ -148,6 +153,7 @@ class App extends Component {
               notes={this.state.notes}
               handleDrag={(e, ui, id, boardId) => this.handleDrag(e, ui, id, boardId)}
               bringToFront={(id, boardId) => this.bringToFront(id, boardId)}
+              startDrag={(id, boardId) => this.startDrag(id, boardId)}
               delete={(e, id, boardId) => this.delete(e, id, boardId)}
               noteChange={(id, title, text, boardId) => this.noteChange(id, title, text, boardId)}
               resize={(e, direction, ref, delta, pos, id, boardId) => this.resize(e, direction, ref, delta, pos, id, boardId)}
@@ -167,6 +173,7 @@ class App extends Component {
               notes={this.state.notes}
               handleDrag={(e, ui, id, boardId) => this.handleDrag(e, ui, id, boardId)}
               bringToFront={(id, boardId) => this.bringToFront(id, boardId)}
+              startDrag={(id, boardId) => this.startDrag(id, boardId)}
               delete={(e, id, boardId) => this.delete(e, id, boardId)}
               noteChange={(id, title, text, boardId) => this.noteChange(id, title, text, boardId)}
               resize={(e, direction, ref, delta, pos, id, boardId) => this.resize(e, direction, ref, delta, pos, id, boardId)}
