@@ -14,36 +14,77 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 firebase.analytics();
 
-export function fetchNotes(callback) {
-  firebase.database().ref('notes').on('value', (snapshot) => {
-    callback(snapshot.val());
-  });
+export function fetchNotes(boardId, callback) {
+  if (!boardId) {
+    firebase.database().ref('notes').child('default').on('value', (snapshot) => {
+      callback(snapshot.val());
+    });
+  } else {
+    firebase.database().ref('notes').child(boardId).on('value', (snapshot) => {
+      callback(snapshot.val());
+    });
+  }
 }
 
-export function addNote(note) {
-  firebase.database().ref('notes').push(note);
+export function addNote(note, boardId, callback) {
+  if (!boardId) {
+    firebase.database().ref('notes').child('default').push(note)
+      .then((snapshot) => {
+        callback(snapshot.key);
+      });
+  } else {
+    firebase.database().ref('notes').child(boardId).push(note)
+      .then((snapshot) => {
+        callback(snapshot.key);
+      });
+  }
 }
 
-export function deleteNote(id) {
-  firebase.database().ref('notes').child(id).remove();
+export function deleteNote(id, boardId) {
+  if (!boardId) {
+    firebase.database().ref('notes').child('default').child(id)
+      .remove();
+  } else {
+    firebase.database().ref('notes').child(boardId).child(id)
+      .remove();
+  }
 }
 
-export function updateNote(id, note) {
-  firebase.database().ref('notes').child(id).update(note);
+export function updateNote(id, note, boardId, callback) {
+  if (!boardId) {
+    firebase.database().ref('notes').child('default').child(id)
+      .update(note, () => callback());
+  } else {
+    firebase.database().ref('notes').child(boardId).child(id)
+      .update(note, () => callback());
+  }
 }
 
-export function updateZ(id, z) {
-  firebase.database().ref('notes').child(id).update({ zIndex: z });
+export function updateZ(id, z, boardId) {
+  if (!boardId) {
+    firebase.database().ref('notes').child('default').child(id)
+      .update({ zIndex: z });
+  } else {
+    firebase.database().ref('notes').child(boardId).child(id)
+      .update({ zIndex: z });
+  }
 }
 
-export function updateAllNotes(notes) {
+export function updateAllNotes(notes, boardId) {
+  let b = boardId;
+  if (!b) {
+    b = 'default';
+  }
+
   notes.entrySeq().forEach(([id, note]) => {
-    firebase.database().ref('notes').child(id).update(note);
+    firebase.database().ref('notes').child(b).child(id)
+      .update(note);
   });
-  firebase.database().ref('notes').once('value', (snapshot) => {
+  firebase.database().ref('notes').child(b).once('value', (snapshot) => {
     snapshot.forEach((child) => {
       if (!notes.has(child.key)) {
-        firebase.database().ref('notes').child(child.key).remove();
+        firebase.database().ref('notes').child(b).child(child.key)
+          .remove();
       }
     });
   });

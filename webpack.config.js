@@ -13,6 +13,10 @@ module.exports = {
   devtool: 'source-map', // this enables debugging with source in chrome devtools
   devServer: {
     hot: true,
+    historyApiFallback: true,
+  },
+  output: {
+    publicPath: '/',
   },
   module: {
     rules: [

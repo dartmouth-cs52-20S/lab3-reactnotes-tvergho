@@ -2,7 +2,11 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import './style.scss';
 import { Map, List } from 'immutable';
-import Note from './components/note';
+import {
+  BrowserRouter as Router,
+  Route,
+} from 'react-router-dom';
+import NoteGenerator from './components/note_generator';
 import AddNoteBar from './components/add_note_bar';
 import * as db from './services/datastore';
 
@@ -20,35 +24,33 @@ class App extends Component {
     };
   }
 
-  componentDidMount() {
-    db.fetchNotes((notes) => {
-      // console.log(notes);
+  updateNotes = (notes) => {
+    this.setState((prevState) => ({
+      // eslint-disable-next-line new-cap
+      notes: Map(notes),
+    }));
+
+    if (!this.state.hasBeenInitialized) {
       this.setState((prevState) => ({
         // eslint-disable-next-line new-cap
-        notes: Map(notes),
-      }));
-
-      if (!this.state.hasBeenInitialized) {
-        this.setState((prevState) => ({
-          // eslint-disable-next-line new-cap
-          undoHistory: prevState.undoHistory.push(Map(notes)),
-          hasBeenInitialized: true,
-        }), () => {
-          this.updateZ();
-        });
-      }
-    });
+        undoHistory: prevState.undoHistory.push(Map(notes)),
+        hasBeenInitialized: true,
+      }), () => {
+        this.updateZ();
+      });
+    }
   }
 
   addToUndo = () => {
     this.setState((prevState) => ({
       undoHistory: prevState.undoHistory.push(prevState.notes),
     }));
+    console.log(this.state.undoHistory);
   }
 
-  undo = () => {
+  undo = (boardId) => {
     if (this.state.undoHistory.size >= 2) {
-      db.updateAllNotes(this.state.undoHistory.get(this.state.undoHistory.size - 2));
+      db.updateAllNotes(this.state.undoHistory.get(this.state.undoHistory.size - 2), boardId);
 
       this.setState((prevState) => ({
         undoHistory: prevState.undoHistory.pop(),
@@ -69,36 +71,33 @@ class App extends Component {
     }));
   }
 
-  bringToFront = (id) => {
+  bringToFront = (id, boardId) => {
     this.updateZ();
-    db.updateZ(id, this.state.nextZ);
+    db.updateZ(id, this.state.nextZ, boardId);
   }
 
-  delete = (e, id) => {
+  delete = (e, id, boardId) => {
     e.stopPropagation();
-    db.deleteNote(id);
+    db.deleteNote(id, boardId);
     this.addToUndo();
   }
 
-  noteChange = (id, newTitle, newText) => {
-    console.log(this.state.notes.get(id));
+  noteChange = (id, newTitle, newText, boardId) => {
     const newNote = this.state.notes.get(id);
     newNote.title = newTitle;
     newNote.text = newText;
-    db.updateNote(id, newNote);
-    this.addToUndo();
+    db.updateNote(id, newNote, boardId, () => this.addToUndo());
   }
 
-  handleDrag = (e, ui, id) => {
+  handleDrag = (e, ui, id, boardId) => {
     const newNote = this.state.notes.get(id);
     newNote.x = ui.x;
     newNote.y = ui.y;
     newNote.zIndex = this.state.nextZ;
-    db.updateNote(id, newNote);
-    this.addToUndo();
+    db.updateNote(id, newNote, boardId, () => this.addToUndo());
   }
 
-  onAddNote = (e, title) => {
+  onAddNote = (e, title, boardId) => {
     e.preventDefault();
     this.updateZ();
     const z = this.state.nextZ;
@@ -111,37 +110,63 @@ class App extends Component {
       width: 300,
       height: 100,
     };
-    db.addNote(note);
-    this.addToUndo();
+    db.addNote(note, boardId, (id) => {
+      this.addToUndo();
+      this.bringToFront(id, boardId);
+    });
   }
 
-  resize = (e, direction, ref, delta, pos, id) => {
+  resize = (e, direction, ref, delta, pos, id, boardId) => {
     const newNote = this.state.notes.get(id);
     newNote.width += delta.width;
     newNote.height += delta.height;
-    db.updateNote(id, newNote);
-    this.addToUndo();
+    db.updateNote(id, newNote, boardId, () => this.addToUndo());
   }
 
   render() {
     return (
-      <div>
-        <AddNoteBar onClick={(e, title) => this.onAddNote(e, title)} undo={() => this.undo()} />
-        { this.state.notes.entrySeq().map(([id, note]) => (
-          <Note key={id}
-            note={note}
-            onDrag={(e, ui) => this.handleDrag(e, ui, id)}
-            onStartDrag={() => this.bringToFront(id)}
-            onDelete={(e) => this.delete(e, id)}
-            onNoteChange={(title, text) => this.noteChange(id, title, text)}
-            onClick={() => this.bringToFront(id)}
-            onResizeStart={() => this.bringToFront(id)}
-            onResize={(e, direction, ref, delta, pos) => this.resize(e, direction, ref, delta, pos, id)}
-          />
-        )) }
-      </div>
+      <Router>
+        {/* eslint-disable-next-line react/jsx-props-no-spreading */ }
+        <Route exact path="/" render={(props) => (<AddNoteBar onClick={(e, title, boardId) => this.onAddNote(e, title, boardId)} undo={(boardId) => this.undo(boardId)} {...props} />)} />
+        <Route exact
+          path="/"
+          render={(props) => (
+            <NoteGenerator
+              notes={this.state.notes}
+              handleDrag={(e, ui, id, boardId) => this.handleDrag(e, ui, id, boardId)}
+              bringToFront={(id, boardId) => this.bringToFront(id, boardId)}
+              delete={(e, id, boardId) => this.delete(e, id, boardId)}
+              noteChange={(id, title, text, boardId) => this.noteChange(id, title, text, boardId)}
+              resize={(e, direction, ref, delta, pos, id, boardId) => this.resize(e, direction, ref, delta, pos, id, boardId)}
+              onDataChange={(notes) => this.updateNotes(notes)}
+              /* eslint-disable-next-line react/jsx-props-no-spreading */
+              {...props}
+            />
+          )}
+        />
+
+        {/* eslint-disable-next-line react/jsx-props-no-spreading */ }
+        <Route path="/:id" render={(props) => (<AddNoteBar onClick={(e, title, boardId) => this.onAddNote(e, title, boardId)} undo={(boardId) => this.undo(boardId)} {...props} />)} />
+        <Route path="/:id"
+          render={(props) => (
+            <NoteGenerator
+              notes={this.state.notes}
+              handleDrag={(e, ui, id, boardId) => this.handleDrag(e, ui, id, boardId)}
+              bringToFront={(id, boardId) => this.bringToFront(id, boardId)}
+              delete={(e, id, boardId) => this.delete(e, id, boardId)}
+              noteChange={(id, title, text, boardId) => this.noteChange(id, title, text, boardId)}
+              resize={(e, direction, ref, delta, pos, id, boardId) => this.resize(e, direction, ref, delta, pos, id, boardId)}
+              onDataChange={(notes) => this.updateNotes(notes)}
+              /* eslint-disable-next-line react/jsx-props-no-spreading */
+              {...props}
+            />
+          )}
+        />
+      </Router>
     );
   }
 }
 
-ReactDOM.render(<App />, document.getElementById('main'));
+ReactDOM.render(
+  <App />, document.getElementById('main'),
+);
